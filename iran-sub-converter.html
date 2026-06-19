@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iran Sub Converter | تبدیل سابسکریپشن</title>
+<style>
+:root{--bg:#0f0f13;--surface:#18181f;--surface2:#22222c;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#f0f0f5;--muted:#888899;--accent:#7c6ff7;--accent2:#5b52e0;--green:#3ecf8e;--red:#f26b6b;--amber:#f5a623;--radius:10px;--radius-lg:16px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:2rem 1rem;}
+.container{max-width:780px;margin:0 auto;}
+header{text-align:center;margin-bottom:2.5rem;}
+.logo{display:inline-flex;align-items:center;gap:12px;margin-bottom:.8rem;}
+.logo-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),#a78bfa);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+h1{font-size:1.6rem;font-weight:700;}
+.subtitle{font-size:.88rem;color:var(--muted);margin-top:.3rem;}
+.subtitle span{color:var(--accent);}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1.25rem;}
+.card-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.85rem;font-weight:600;}
+input[type=text],textarea{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-family:inherit;font-size:.9rem;padding:.65rem .85rem;outline:none;transition:border-color .15s;}
+input[type=text]:focus,textarea:focus{border-color:var(--accent);}
+input[type=text]::placeholder,textarea::placeholder{color:var(--muted);opacity:.6;}
+.format-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem;margin-top:.5rem;}
+.format-btn{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:.7rem .5rem;text-align:center;cursor:pointer;transition:all .15s;color:var(--muted);font-size:.85rem;font-weight:500;user-select:none;}
+.format-btn:hover{border-color:var(--accent);color:var(--text);}
+.format-btn.active{background:rgba(124,111,247,.15);border-color:var(--accent);color:var(--accent);}
+.format-icon{font-size:1.2rem;display:block;margin-bottom:4px;}
+.convert-btn{width:100%;padding:.9rem;background:var(--accent);border:none;border-radius:var(--radius);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;transition:background .15s,transform .1s;margin-top:1.25rem;}
+.convert-btn:hover{background:var(--accent2);}
+.convert-btn:active{transform:scale(.98);}
+.convert-btn:disabled{opacity:.5;cursor:not-allowed;}
+.status-bar{display:flex;align-items:center;gap:.6rem;padding:.6rem .85rem;border-radius:var(--radius);font-size:.85rem;margin-top:.75rem;}
+.status-bar.info{background:rgba(124,111,247,.12);color:#a78bfa;}
+.status-bar.success{background:rgba(62,207,142,.12);color:var(--green);}
+.status-bar.error{background:rgba(242,107,107,.12);color:var(--red);}
+.status-bar.warning{background:rgba(245,166,35,.12);color:var(--amber);}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{display:inline-block;animation:spin .9s linear infinite;margin-right:4px;}
+.output-area{position:relative;}
+textarea#output{font-family:'SF Mono','Fira Code',monospace;font-size:.78rem;min-height:150px;resize:vertical;line-height:1.6;}
+.copy-btn{position:absolute;top:.5rem;right:.5rem;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-size:.75rem;padding:4px 10px;cursor:pointer;transition:all .15s;}
+.copy-btn:hover{color:var(--text);border-color:var(--accent);}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-top:1rem;}
+.stat{background:var(--surface2);border-radius:var(--radius);padding:.75rem;text-align:center;}
+.stat-num{font-size:1.4rem;font-weight:700;color:var(--accent);}
+.stat-label{font-size:.72rem;color:var(--muted);margin-top:2px;}
+.node-list{margin-top:1rem;max-height:280px;overflow-y:auto;}
+.node-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;border-radius:8px;font-size:.82rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.node-item:hover{background:var(--surface2);}
+.node-badge{font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:4px;flex-shrink:0;text-transform:uppercase;}
+.badge-vless{background:rgba(124,111,247,.2);color:#a78bfa;}
+.badge-vmess{background:rgba(62,207,142,.2);color:var(--green);}
+.badge-trojan{background:rgba(245,166,35,.2);color:var(--amber);}
+.badge-ss{background:rgba(242,107,107,.2);color:var(--red);}
+.badge-hy2{background:rgba(100,180,255,.2);color:#64b4ff;}
+.node-name{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.node-addr{color:var(--muted);font-size:.75rem;flex-shrink:0;}
+.tip-box{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:var(--radius);padding:.85rem 1rem;font-size:.83rem;color:var(--amber);margin-top:1rem;line-height:1.7;}
+.tip-box strong{display:block;margin-bottom:.25rem;}
+.tabs{display:flex;gap:.5rem;margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:.75rem;}
+.tab{padding:.4rem .85rem;border-radius:6px;font-size:.82rem;cursor:pointer;color:var(--muted);border:1px solid transparent;transition:all .15s;}
+.tab.active{color:var(--accent);border-color:var(--accent);background:rgba(124,111,247,.1);}
+.how-it-works{background:rgba(62,207,142,.06);border:1px solid rgba(62,207,142,.15);border-radius:var(--radius);padding:.85rem 1rem;font-size:.82rem;color:#3ecf8e;margin-bottom:1.25rem;line-height:1.8;}
+.how-it-works strong{font-size:.85rem;}
+footer{text-align:center;margin-top:2rem;font-size:.78rem;color:var(--muted);line-height:1.8;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🔄</div>
+      <div><h1>Iran Sub Converter</h1></div>
+    </div>
+    <p class="subtitle">Convert proxy subscriptions to any format &nbsp;·&nbsp; <span>تبدیل سابسکریپشن</span></p>
+  </header>
+
+  <div class="how-it-works">
+    <strong>✅ No server, no API, no proxy needed</strong><br>
+    This tool fetches your subscription directly in the browser. Must be hosted on a website (GitHub Pages, Netlify, etc.) — not opened as a local file.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Subscription URL — لینک سابسکریپشن</div>
+    <input type="text" id="subUrl" placeholder="https://your-subscription-url.com/sub/..." />
+    <div id="fetchStatus"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Output Format — فرمت خروجی</div>
+    <div class="format-grid">
+      <div class="format-btn active" data-format="v2ray" onclick="selectFormat(this)"><span class="format-icon">📋</span>V2Ray</div>
+      <div class="format-btn" data-format="clash" onclick="selectFormat(this)"><span class="format-icon">⚔️</span>Clash YAML</div>
+      <div class="format-btn" data-format="singbox" onclick="selectFormat(this)"><span class="format-icon">📦</span>Sing-box</div>
+      <div class="format-btn" data-format="links" onclick="selectFormat(this)"><span class="format-icon">🔗</span>Raw Links</div>
+      <div class="format-btn" data-format="passwall" onclick="selectFormat(this)"><span class="format-icon">🛡️</span>PassWall2</div>
+    </div>
+  </div>
+
+  <button class="convert-btn" onclick="convert()" id="convertBtn">Convert — تبدیل</button>
+
+  <div id="resultsSection" style="display:none">
+    <div class="card" style="margin-top:1.25rem">
+      <div class="card-title">Parsed Nodes — نودهای یافت شده</div>
+      <div class="stats" id="statsRow"></div>
+      <div class="node-list" id="nodeList"></div>
+    </div>
+    <div class="card">
+      <div class="tabs">
+        <div class="tab active" onclick="showTab('output',this)">Output</div>
+        <div class="tab" onclick="showTab('info',this)">Info</div>
+      </div>
+      <div id="tab-output">
+        <div class="card-title">Converted Output — خروجی</div>
+        <div class="output-area">
+          <textarea id="output" readonly></textarea>
+          <button class="copy-btn" onclick="copyOutput()">Copy</button>
+        </div>
+        <div id="copyStatus"></div>
+      </div>
+      <div id="tab-info" style="display:none">
+        <div class="card-title">Subscription Info</div>
+        <div id="subInfo" style="font-size:.85rem;line-height:2.2;color:var(--muted)"></div>
+      </div>
+    </div>
+    <div class="tip-box" id="passwall-tip" style="display:none">
+      <strong>⚠️ PassWall2 / OpenWrt tip</strong>
+      Your nodes include VLESS Reality or xhttp type which PassWall2 may skip.<br>
+      Use <strong>Raw Links</strong> format → copy each <code>vless://</code> link → paste manually in PassWall2 → Node List → Add Node.
+    </div>
+  </div>
+
+  <footer>
+    100% browser-based · No server needed · Host free on GitHub Pages or Netlify<br>
+    بدون سرور · رایگان روی GitHub Pages یا Netlify
+  </footer>
+</div>
+
+<script>
+let parsedNodes = [];
+let selectedFormat = 'v2ray';
+
+// ── CORS proxy list – tried in order ──────────────────────────────────────
+const PROXIES = [
+  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://cors-anywhere.herokuapp.com/${url}`,
+  url => `https://thingproxy.freeboard.io/fetch/${url}`,
+];
+
+async function fetchWithFallback(url) {
+  // 1. Try direct fetch first (works when server has CORS headers)
+  try {
+    const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (r.ok) return await r.text();
+  } catch(_) {}
+
+  // 2. Try each CORS proxy
+  for (const proxy of PROXIES) {
+    try {
+      const r = await fetch(proxy(url), {
+        signal: AbortSignal.timeout(10000),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (r.ok) {
+        const text = await r.text();
+        if (text && text.length > 10) return text;
+      }
+    } catch(_) {}
+  }
+  throw new Error('All fetch attempts failed. Make sure this page is hosted on a website (not opened as a local file), or paste your subscription content manually below.');
+}
+
+function selectFormat(el) {
+  document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  selectedFormat = el.dataset.format;
+  if (parsedNodes.length > 0) renderOutput();
+  const hasReality = parsedNodes.some(n => n.security === 'reality' || n.network === 'xhttp');
+  document.getElementById('passwall-tip').style.display = (selectedFormat === 'passwall' && hasReality) ? 'block' : 'none';
+}
+
+function showTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-output').style.display = name === 'output' ? 'block' : 'none';
+  document.getElementById('tab-info').style.display = name === 'info' ? 'block' : 'none';
+}
+
+function setStatus(id, type, msg) {
+  document.getElementById(id).innerHTML = `<div class="status-bar ${type}"><div class="dot"></div>${msg}</div>`;
+}
+
+async function convert() {
+  const url = document.getElementById('subUrl').value.trim();
+  if (!url) { setStatus('fetchStatus','error','Please enter a subscription URL'); return; }
+
+  const btn = document.getElementById('convertBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Fetching...';
+  setStatus('fetchStatus','info','<span class="spin">↻</span> Fetching subscription...');
+
+  try {
+    let raw = await fetchWithFallback(url);
+    raw = raw.trim().replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '');
+
+    let decoded = raw;
+    if (!raw.includes('://') && !raw.includes('proxies:')) {
+      try { decoded = atob(raw.replace(/[\s\r\n]/g, '')); } catch(_) {}
+    }
+
+    parsedNodes = decoded.includes('proxies:') ? parseClash(decoded) : parseLinks(decoded);
+
+    if (parsedNodes.length === 0) {
+      // last attempt: maybe raw itself is double-encoded
+      try { parsedNodes = parseLinks(atob(raw.replace(/[\s\r\n]/g, ''))); } catch(_) {}
+    }
+
+    if (parsedNodes.length === 0) throw new Error('No supported nodes found. The subscription may be in an unsupported format.');
+
+    setStatus('fetchStatus', 'success', `✓ Found ${parsedNodes.length} nodes`);
+    renderStats();
+    renderNodeList();
+    renderOutput();
+    renderSubInfo(url);
+    document.getElementById('resultsSection').style.display = 'block';
+
+  } catch(e) {
+    setStatus('fetchStatus', 'error', e.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Convert — تبدیل';
+}
+
+// ── Parsers ───────────────────────────────────────────────────────────────
+function parseLinks(text) {
+  return text.split(/[\n\r]+/).map(l => l.trim()).filter(Boolean).map(parseSingle).filter(Boolean);
+}
+function parseSingle(link) {
+  try {
+    if (link.startsWith('vless://'))   return parseVless(link);
+    if (link.startsWith('vmess://'))   return parseVmess(link);
+    if (link.startsWith('trojan://'))  return parseTrojan(link);
+    if (link.startsWith('ss://'))      return parseSS(link);
+    if (link.startsWith('hysteria2://')||link.startsWith('hy2://')) return parseHy2(link);
+  } catch(_) {}
+  return null;
+}
+function cname(raw) { try { return decodeURIComponent(raw).replace(/[^\x20-\x7E\u0600-\u06FF]/g,'').trim(); } catch(_) { return raw||''; } }
+function parseVless(link) {
+  const u=new URL(link),p=u.searchParams;
+  return {type:'vless',uuid:u.username,server:u.hostname,port:parseInt(u.port)||443,
+    name:cname(u.hash.slice(1))||u.hostname,security:p.get('security')||'none',
+    network:p.get('type')||'tcp',sni:p.get('sni')||'',pbk:p.get('pbk')||'',
+    sid:p.get('sid')||'',fp:p.get('fp')||'',host:p.get('host')||'',
+    path:p.get('path')||'',mode:p.get('mode')||'',flow:p.get('flow')||'',raw:link};
+}
+function parseVmess(link) {
+  const o=JSON.parse(atob(link.slice(8)));
+  return {type:'vmess',uuid:o.id,server:o.add,port:parseInt(o.port),name:o.ps||o.add,
+    alterId:o.aid||0,network:o.net||'tcp',security:o.tls?'tls':'none',
+    host:o.host||'',path:o.path||'/',sni:o.sni||o.host||'',raw:link};
+}
+function parseTrojan(link) {
+  const u=new URL(link),p=u.searchParams;
+  return {type:'trojan',password:u.username,server:u.hostname,port:parseInt(u.port)||443,
+    name:cname(u.hash.slice(1))||u.hostname,security:p.get('security')||'tls',
+    sni:p.get('sni')||u.hostname,network:p.get('type')||'tcp',
+    path:p.get('path')||'',host:p.get('host')||'',raw:link};
+}
+function parseSS(link) {
+  const u=new URL(link);
+  let method='',password='';
+  try{[method,password]=atob(u.username).split(':');}catch(_){method=u.username;password=u.password;}
+  return {type:'ss',method,password,server:u.hostname,port:parseInt(u.port),
+    name:cname(u.hash.slice(1))||u.hostname,security:'none',raw:link};
+}
+function parseHy2(link) {
+  const u=new URL(link.replace('hy2://','hysteria2://')),p=u.searchParams;
+  return {type:'hy2',password:u.username,server:u.hostname,port:parseInt(u.port)||443,
+    name:cname(u.hash.slice(1))||u.hostname,security:'tls',sni:p.get('sni')||'',raw:link};
+}
+function parseClash(yaml) {
+  const m=yaml.match(/proxies:([\s\S]*?)(?=\nproxy-groups:|\nrules:|\nrule-providers:|$)/);
+  if(!m) return [];
+  const nodes=[];let cur=null;
+  for(const line of m[1].split('\n')){
+    if(line.match(/^\s*-\s*name:/)){if(cur)nodes.push(cur);cur={};}
+    if(!cur)continue;
+    const kv=line.match(/^\s+(\w[\w-]*):\s*(.+)/);
+    if(kv)cur[kv[1].trim()]=kv[2].trim().replace(/^["']|["']$/g,'');
+  }
+  if(cur)nodes.push(cur);
+  return nodes.filter(n=>n.server).map(n=>({...n,type:n.type||'unknown',
+    name:n.name||n.server,security:n.tls==='true'?'tls':'none',raw:null}));
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+function renderStats() {
+  const counts={};
+  parsedNodes.forEach(n=>{counts[n.type]=(counts[n.type]||0)+1;});
+  const servers=new Set(parsedNodes.map(n=>n.server)).size;
+  document.getElementById('statsRow').innerHTML=`
+    <div class="stat"><div class="stat-num">${parsedNodes.length}</div><div class="stat-label">Total Nodes</div></div>
+    <div class="stat"><div class="stat-num">${Object.keys(counts).length}</div><div class="stat-label">Protocols</div></div>
+    <div class="stat"><div class="stat-num">${servers}</div><div class="stat-label">Servers</div></div>`;
+}
+function renderNodeList() {
+  document.getElementById('nodeList').innerHTML=parsedNodes.map((n,i)=>
+    `<div class="node-item" onclick="copyNode(${i})" title="Click to copy link">
+      <span class="node-badge badge-${n.type}">${n.type}</span>
+      <span class="node-name">${n.name||n.server}</span>
+      <span class="node-addr">${n.server}:${n.port}</span>
+    </div>`).join('');
+}
+function copyNode(i){if(parsedNodes[i].raw)navigator.clipboard.writeText(parsedNodes[i].raw).catch(()=>{});}
+
+function renderOutput() {
+  const withRaw=parsedNodes.filter(n=>n.raw);
+  let out='';
+  if(selectedFormat==='v2ray'||selectedFormat==='passwall'){
+    out=btoa(unescape(encodeURIComponent(withRaw.map(n=>n.raw).join('\n'))));
+  }else if(selectedFormat==='links'){
+    out=withRaw.map(n=>n.raw).join('\n');
+  }else if(selectedFormat==='clash'){
+    out=buildClash();
+  }else if(selectedFormat==='singbox'){
+    out=buildSingbox();
+  }
+  document.getElementById('output').value=out;
+}
+
+function buildClash(){
+  const lines=['mixed-port: 7890','allow-lan: false','mode: Rule','log-level: info','','proxies:'];
+  for(const n of parsedNodes){
+    if(n.type==='vless'){
+      lines.push(`  - name: "${n.name}"`,`    type: vless`,`    server: ${n.server}`,`    port: ${n.port}`,`    uuid: ${n.uuid}`,`    network: ${n.network||'tcp'}`,`    tls: ${n.security==='tls'||n.security==='reality'}`);
+      if(n.sni)lines.push(`    servername: ${n.sni}`);
+      if(n.security==='reality'){lines.push(`    reality-opts:`,`      public-key: ${n.pbk}`);if(n.sid)lines.push(`      short-id: ${n.sid}`);}
+      if(n.network==='ws'){lines.push(`    ws-opts:`,`      path: "${n.path||'/'}"`);if(n.host)lines.push(`      headers:`,`        Host: ${n.host}`);}
+    }else if(n.type==='vmess'){
+      lines.push(`  - name: "${n.name}"`,`    type: vmess`,`    server: ${n.server}`,`    port: ${n.port}`,`    uuid: ${n.uuid}`,`    alterId: ${n.alterId||0}`,`    cipher: auto`,`    network: ${n.network||'tcp'}`,`    tls: ${n.security==='tls'}`);
+    }else if(n.type==='trojan'){
+      lines.push(`  - name: "${n.name}"`,`    type: trojan`,`    server: ${n.server}`,`    port: ${n.port}`,`    password: ${n.password}`,`    sni: ${n.sni||n.server}`);
+    }else if(n.type==='ss'){
+      lines.push(`  - name: "${n.name}"`,`    type: ss`,`    server: ${n.server}`,`    port: ${n.port}`,`    cipher: ${n.method}`,`    password: "${n.password}"`);
+    }
+  }
+  const names=parsedNodes.map(n=>`      - "${n.name}"`).join('\n');
+  lines.push('','proxy-groups:',`  - name: "🚀 Proxy"`,`    type: select`,`    proxies:`,names,`      - DIRECT`,'','rules:','  - GEOIP,IR,DIRECT','  - MATCH,🚀 Proxy');
+  return lines.join('\n');
+}
+
+function buildSingbox(){
+  const outbounds=parsedNodes.slice(0,30).map((n,i)=>{
+    if(n.type==='vless'){
+      const ob={type:'vless',tag:n.name||`node-${i}`,server:n.server,server_port:n.port,uuid:n.uuid,flow:n.flow||''};
+      if(n.security==='tls'||n.security==='reality'){ob.tls={enabled:true,server_name:n.sni||n.server,utls:{enabled:true,fingerprint:n.fp||'chrome'}};if(n.security==='reality')ob.tls.reality={enabled:true,public_key:n.pbk,short_id:n.sid||''};}
+      if(n.network==='ws')ob.transport={type:'ws',path:n.path||'/',headers:n.host?{Host:n.host}:{}};
+      if(n.network==='xhttp'||n.mode)ob.transport={type:'http',host:[n.host||n.sni||n.server],path:n.path||'/'};
+      return ob;
+    }
+    if(n.type==='vmess')return{type:'vmess',tag:n.name||`node-${i}`,server:n.server,server_port:n.port,uuid:n.uuid,alter_id:n.alterId||0,security:'auto'};
+    if(n.type==='trojan')return{type:'trojan',tag:n.name||`node-${i}`,server:n.server,server_port:n.port,password:n.password,tls:{enabled:true,server_name:n.sni||n.server}};
+    if(n.type==='ss')return{type:'shadowsocks',tag:n.name||`node-${i}`,server:n.server,server_port:n.port,method:n.method,password:n.password};
+    if(n.type==='hy2')return{type:'hysteria2',tag:n.name||`node-${i}`,server:n.server,server_port:n.port,password:n.password,tls:{enabled:true,server_name:n.sni||n.server}};
+    return null;
+  }).filter(Boolean);
+  return JSON.stringify({
+    log:{level:'info'},
+    inbounds:[{type:'mixed',listen:'127.0.0.1',listen_port:2080}],
+    outbounds:[{type:'selector',tag:'proxy',outbounds:outbounds.map(o=>o.tag)},...outbounds,{type:'direct',tag:'direct'},{type:'block',tag:'block'}],
+    route:{rules:[{geoip:'ir',outbound:'direct'}],final:'proxy'}
+  },null,2);
+}
+
+function renderSubInfo(url){
+  const counts={};
+  parsedNodes.forEach(n=>{counts[n.type]=(counts[n.type]||0)+1;});
+  let html=`<div>🌐 Source: <strong style="color:var(--text);font-size:.8rem">${url.slice(0,60)}${url.length>60?'...':''}</strong></div>`;
+  html+=`<div>🔢 Total nodes: <strong style="color:var(--text)">${parsedNodes.length}</strong></div>`;
+  Object.entries(counts).forEach(([t,c])=>{html+=`<div>• ${t.toUpperCase()}: <strong style="color:var(--text)">${c}</strong></div>`;});
+  document.getElementById('subInfo').innerHTML=html;
+}
+
+async function copyOutput(){
+  await navigator.clipboard.writeText(document.getElementById('output').value).catch(()=>{});
+  setStatus('copyStatus','success','✓ Copied!');
+  setTimeout(()=>{document.getElementById('copyStatus').innerHTML='';},2000);
+}
+</script>
+</body>
+</html>
